@@ -1,0 +1,115 @@
+    Checking PixelForge v0.1.0 (E:\Code\IDE\RustRover\PixelForge\src-tauri)
+error[E0432]: unresolved import `image::ImageOutputFormat`
+ --> src-tauri\src\lib.rs:8:13
+  |
+8 | use image::{ImageOutputFormat, DynamicImage, imageops, RgbImage, GenericImageView};
+  |             ^^^^^^^^^^^^^^^^^ no `ImageOutputFormat` in the root
+
+error[E0432]: unresolved import `color_quant::simple_nearest`
+  --> src-tauri\src\lib.rs:10:18
+   |
+10 | use color_quant::simple_nearest::Quantizer;
+   |                  ^^^^^^^^^^^^^^ could not find `simple_nearest` in `color_quant`
+
+warning: unused import: `Pixel`
+ --> src-tauri\src\dithering.rs:1:28
+  |
+1 | use image::{Rgb, RgbImage, Pixel};
+  |                            ^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `Pixel`
+ --> src-tauri\src\effects.rs:1:28
+  |
+1 | use image::{Rgb, RgbImage, Pixel, GenericImageView};
+  |                            ^^^^^
+
+warning: unnecessary parentheses around assigned value
+  --> src-tauri\src\effects.rs:46:29
+   |
+46 |                 let map_x = ((dn_x + 1.0) / 2.0 * width as f32);
+   |                             ^                                 ^
+   |
+   = note: `#[warn(unused_parens)]` (part of `#[warn(unused)]`) on by default
+help: remove these parentheses
+   |
+46 -                 let map_x = ((dn_x + 1.0) / 2.0 * width as f32);
+46 +                 let map_x = (dn_x + 1.0) / 2.0 * width as f32;
+   |
+
+warning: unnecessary parentheses around assigned value
+  --> src-tauri\src\effects.rs:47:29
+   |
+47 |                 let map_y = ((dn_y + 1.0) / 2.0 * height as f32);
+   |                             ^                                  ^
+   |
+help: remove these parentheses
+   |
+47 -                 let map_y = ((dn_y + 1.0) / 2.0 * height as f32);
+47 +                 let map_y = (dn_y + 1.0) / 2.0 * height as f32;
+   |
+
+warning: unused import: `std::path::Path`
+ --> src-tauri\src\lib.rs:7:5
+  |
+7 | use std::path::Path;
+  |     ^^^^^^^^^^^^^^^
+
+warning: unused import: `RgbImage`
+ --> src-tauri\src\lib.rs:8:56
+  |
+8 | use image::{ImageOutputFormat, DynamicImage, imageops, RgbImage, GenericImageView};
+  |                                                        ^^^^^^^^
+
+error[E0716]: temporary value dropped while borrowed
+  --> src-tauri\src\lib.rs:42:17
+   |
+42 |         "-ss", &timestamp_secs.to_string(),
+   |                 ^^^^^^^^^^^^^^^^^^^^^^^^^^ creates a temporary value which is freed while still in use
+...
+48 |     ];
+   |      - temporary value is freed at the end of this statement
+49 |
+50 |     println!("Executing FFmpeg extraction: {} {}", ffmpeg_str, args.join(" "));
+   |                                                                ---- borrow later used here
+   |
+   = note: consider using a `let` binding to create a longer lived value
+
+error[E0599]: no method named `to_rgb8` found for struct `ImageBuffer<image::Rgba<u8>, Vec<u8>>` in the current scope
+  --> src-tauri\src\lib.rs:95:35
+   |
+95 |     let mut rgb_img = resized_img.to_rgb8();
+   |                                   ^^^^^^^ method not found in `ImageBuffer<image::Rgba<u8>, Vec<u8>>`
+
+error[E0599]: no method named `to_rgb8` found for struct `ImageBuffer<_, Vec<_>>` in the current scope
+   --> src-tauri\src\lib.rs:143:53
+    |
+143 |     let final_img = apply_crt_effects(&upscaled_img.to_rgb8(), effects_config);
+    |                                                     ^^^^^^^ method not found in `ImageBuffer<_, Vec<_>>`
+
+error[E0277]: the trait bound `Vec<u8>: Seek` is not satisfied
+    --> src-tauri\src\lib.rs:146:54
+     |
+ 146 |     DynamicImage::ImageRgb8(final_img).write_to(&mut buf, ImageOutputFormat::Png)
+     |                                        --------      ^^^ the trait `Seek` is not implemented for `Vec<u8>`
+     |                                        |
+     |                                        required by a bound introduced by this call
+     |
+     = note: required for `&mut Vec<u8>` to implement `Seek`
+note: required by a bound in `DynamicImage::write_to`
+    --> C:\Users\xhq\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\image-0.25.9\src\images\dynimage.rs:1371:32
+     |
+1371 |     pub fn write_to<W: Write + Seek>(&self, mut w: W, format: ImageFormat) -> ImageResult<()> {
+     |                                ^^^^ required by this bound in `DynamicImage::write_to`
+
+warning: unused import: `GenericImageView`
+ --> src-tauri\src\effects.rs:1:35
+  |
+1 | use image::{Rgb, RgbImage, Pixel, GenericImageView};
+  |                                   ^^^^^^^^^^^^^^^^
+
+Some errors have detailed explanations: E0277, E0432, E0599, E0716.
+For more information about an error, try `rustc --explain E0277`.
+warning: `PixelForge` (lib) generated 7 warnings
+error: could not compile `PixelForge` (lib) due to 6 previous errors; 7 warnings emitted

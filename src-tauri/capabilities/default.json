@@ -6,6 +6,19 @@
     "main"
   ],
   "permissions": [
-    "core:default"
+    "core:default",
+    "dialog:default",
+    "fs:default",
+    {
+      "identifier": "fs:scope",
+      "allow": [
+        "$HOME/**",
+        "C:\\**",
+        "D:\\**",
+        "E:\\**",
+        "F:\\**",
+        "G:\\**"
+      ]
+    }
   ]
 }

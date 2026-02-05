@@ -1,0 +1,76 @@
+    Checking PixelForge v0.1.0 (E:\Code\IDE\RustRover\PixelForge\src-tauri)
+warning: unused import: `std::path::Path`
+ --> src-tauri\src\lib.rs:7:5
+  |
+7 | use std::path::Path;
+  |     ^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `RgbImage`
+ --> src-tauri\src\lib.rs:8:50
+  |
+8 | use image::{ImageFormat, DynamicImage, imageops, RgbImage, GenericImageView};
+  |                                                  ^^^^^^^^
+
+error[E0308]: mismatched types
+   --> src-tauri\src\lib.rs:149:35
+    |
+149 |         rgb_img = apply_dithering(&rgb_img, &palette, dither_algo, dither_strength);
+    |                   --------------- ^^^^^^^^ expected `&ImageBuffer<Rgb<u8>, Vec<u8>>`, found `&ImageBuffer<Rgba<u8>, Vec<u8>>`
+    |                   |
+    |                   arguments to this function are incorrect
+    |
+    = note: expected reference `&ImageBuffer<Rgb<u8>, _>`
+               found reference `&ImageBuffer<image::Rgba<u8>, _>`
+note: function defined here
+   --> src-tauri\src\dithering.rs:35:8
+    |
+ 35 | pub fn apply_dithering(
+    |        ^^^^^^^^^^^^^^^
+ 36 |     img: &RgbImage,
+    |     --------------
+
+error[E0308]: mismatched types
+   --> src-tauri\src\lib.rs:149:19
+    |
+100 |     let mut rgb_img = resized_img; // logic flows better if we just use it
+    |                       ----------- expected due to this value
+...
+149 |         rgb_img = apply_dithering(&rgb_img, &palette, dither_algo, dither_strength);
+    |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected `ImageBuffer<Rgba<u8>, Vec<u8>>`, found `ImageBuffer<Rgb<u8>, Vec<u8>>`
+    |
+    = note: expected struct `ImageBuffer<image::Rgba<u8>, _>`
+               found struct `ImageBuffer<Rgb<u8>, _>`
+
+error[E0308]: mismatched types
+   --> src-tauri\src\lib.rs:163:39
+    |
+163 |     let final_img = apply_crt_effects(&upscaled_img, effects_config);
+    |                     ----------------- ^^^^^^^^^^^^^ expected `&ImageBuffer<Rgb<u8>, Vec<u8>>`, found `&ImageBuffer<Rgba<u8>, Vec<u8>>`
+    |                     |
+    |                     arguments to this function are incorrect
+    |
+    = note: expected reference `&ImageBuffer<Rgb<u8>, _>`
+               found reference `&ImageBuffer<image::Rgba<u8>, _>`
+note: function defined here
+   --> src-tauri\src\effects.rs:25:8
+    |
+ 25 | pub fn apply_crt_effects(img: &RgbImage, config: CRTEffectsConfig) -> RgbImage {
+    |        ^^^^^^^^^^^^^^^^^ --------------
+
+warning: unused import: `GenericImageView`
+ --> src-tauri\src\effects.rs:2:28
+  |
+2 | use image::{Rgb, RgbImage, GenericImageView};
+  |                            ^^^^^^^^^^^^^^^^
+
+warning: unused import: `rayon::prelude`
+  --> src-tauri\src\lib.rs:12:5
+   |
+12 | use rayon::prelude::*;
+   |     ^^^^^^^^^^^^^^
+
+For more information about this error, try `rustc --explain E0308`.
+warning: `PixelForge` (lib) generated 4 warnings
+error: could not compile `PixelForge` (lib) due to 3 previous errors; 4 warnings emitted

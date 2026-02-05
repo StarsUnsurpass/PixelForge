@@ -5,7 +5,7 @@
   "identifier": "com.tauri.dev",
   "build": {
     "frontendDist": "src/src/dist",
-    "devUrl": "http://localhost:5173",
+    "devUrl": "http://127.0.0.1:3000",
     "beforeDevCommand": "npm run dev --prefix src",
     "beforeBuildCommand": "npm run build --prefix src"
   },
@@ -33,6 +33,8 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": ["resources/ffmpeg"]
+    "resources": [
+      "resources/ffmpeg.exe"
+    ]
   }
 }

@@ -1,117 +1,128 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
-import { invoke } from "@tauri-apps/api/tauri";
-import './App.css'
+import ControlPanel from './components/ControlPanel';
+import VideoCanvas from './components/VideoCanvas';
+import Timeline from './components/Timeline';
+import { useProjectStore } from './store/useProjectStore';
+import { FileVideo, Loader2, PlayCircle, Sparkles } from 'lucide-react';
+import { invoke } from '@tauri-apps/api/core';
+import { save } from '@tauri-apps/plugin-dialog';
+import { listen } from '@tauri-apps/api/event'; // Import listen
+import { useState, useEffect } from 'react';
 
 function App() {
-  const [dividerPosition, setDividerPosition] = useState(50); // 0-100 percentage
-  const containerRef = useRef<HTMLDivElement>(null);
-  const isDragging = useRef(false);
-  const [greetingMessage, setGreetingMessage] = useState("");
+  const { videoMetadata, processingParams } = useProjectStore();
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState(0); // Progress state
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    isDragging.current = true;
-    e.preventDefault();
-  }, []);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isDragging.current || !containerRef.current) return;
-
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const newPosition = ((e.clientX - containerRect.left) / containerRect.width) * 100;
-
-    // Clamp the position to be within 10% and 90%
-    setDividerPosition(Math.max(10, Math.min(90, newPosition)));
-  }, []);
-
-  const handleMouseUp = useCallback(() => {
-    isDragging.current = false;
-  }, []);
-
+  // Listen for export progress
   useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    const unlistenPromise = listen<number>('export-progress', (event) => {
+      setExportProgress(event.payload);
+    });
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
+      unlistenPromise.then(unlisten => unlisten());
     };
-  }, [handleMouseMove, handleMouseUp]);
+  }, []);
 
-  async function greet() {
-    // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    setGreetingMessage(await invoke("greet", { name: "World" }));
-  }
+  const handleExport = async () => {
+    if (!videoMetadata) return;
+
+    try {
+      const output = await save({
+        filters: [{
+          name: 'Video',
+          extensions: ['mp4']
+        }],
+        defaultPath: 'pixel_art_output.mp4',
+      });
+
+      if (output) {
+        setIsExporting(true);
+        setExportProgress(0); // Reset progress
+        console.log("Starting export to:", output);
+
+        // Call backend export with new parameters
+        const result = await invoke('export_video', {
+          inputVideoPath: videoMetadata.path,
+          outputVideoPath: output,
+          scaleFactor: processingParams.scaleFactor,
+          width: videoMetadata.width,
+          height: videoMetadata.height,
+          totalDurationSec: videoMetadata.duration, // Pass duration
+        });
+
+        console.log("Export result:", result);
+        alert(`导出成功 (Success)!\n文件保存在: ${output}`);
+      }
+    } catch (e) {
+      console.error("Export failed:", e);
+      alert(`导出失败 (Failed): ${e}`);
+    } finally {
+      setIsExporting(false);
+      setExportProgress(0);
+    }
+  };
 
   return (
-    <div className="flex h-screen bg-gray-900 text-white">
-      {/* Left Sidebar (Control Inspector) */}
-      <aside className="w-64 bg-gray-800 p-4 flex flex-col">
-        <h2 className="text-xl font-bold mb-4">Control Inspector</h2>
-        {/* Placeholder for controls */}
-        <div className="space-y-4 flex-grow">
-          <div className="bg-gray-700 p-3 rounded">Resolution Scale</div>
-          <div className="bg-gray-700 p-3 rounded">Color Depth</div>
-          <div className="bg-gray-700 p-3 rounded">Dithering Algorithm</div>
-        </div>
-        <div className="mt-auto pt-4 border-t border-gray-700">
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-            Export Video
-          </button>
-        </div>
-      </aside>
+    <div className="flex h-screen bg-zinc-950 text-zinc-100 font-sans selection:bg-cyan-500/30">
+      {/* Left Sidebar - Control Panel */}
+      <ControlPanel />
 
-      {/* Main Content Area (Split Preview Canvas) */}
-      <main className="flex-1 flex flex-col">
-        {/* Top bar for potential controls or title */}
-        <header className="bg-gray-800 p-4 shadow-md flex items-center justify-between">
-          <h1 className="text-2xl font-bold">PixelForge</h1>
-          <div className="flex items-center space-x-4">
-            <input type="file" className="hidden" id="video-upload" accept="video/*" />
-            <label htmlFor="video-upload" className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded cursor-pointer">
-              Upload Video
-            </label>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" onClick={greet}>
-              Greet Backend
-            </button>
-            {greetingMessage && <p>{greetingMessage}</p>}
-            <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
-              Play/Pause
+      {/* Main Area */}
+      <main className="flex-1 flex flex-col min-w-0 bg-dotted-spacing-4 bg-dotted-zinc-800/30 relative">
+        <div className="absolute inset-0 bg-gradient-to-tr from-zinc-950/80 via-transparent to-zinc-950/50 pointer-events-none" />
+
+        {/* Header / Toolbar */}
+        <header className="h-16 flex items-center justify-between px-6 z-10 border-b border-white/5 backdrop-blur-md bg-zinc-900/50">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold bg-gradient-to-r from-white to-zinc-400 bg-clip-text text-transparent tracking-tight">PixelForge</h1>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] text-zinc-500 font-mono uppercase tracking-wider">v0.1.0 Beta</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-6">
+            {/* Progress Bar (Visible only when exporting) */}
+            {isExporting && (
+              <div className="flex items-center gap-3 w-64 bg-zinc-800/50 rounded-full px-4 py-1.5 border border-white/5">
+                <span className="text-xs text-cyan-400 font-mono whitespace-nowrap">{Math.round(exportProgress)}%</span>
+                <div className="flex-1 h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 ease-out rounded-full"
+                    style={{ width: `${exportProgress}%` }}
+                  />
+                </div>
+              </div>
+            )}
+
+            <button
+              onClick={handleExport}
+              className="group relative inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-medium text-sm transition-all hover:shadow-lg hover:shadow-cyan-500/25 active:scale-95 disabled:opacity-50 disabled:pointer-events-none disabled:active:scale-100"
+              disabled={!videoMetadata || isExporting}
+            >
+              {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileVideo className="w-4 h-4 transition-transform group-hover:-translate-y-0.5" />}
+              {isExporting ? '处理中 (Processing)...' : '导出视频 (Export)'}
             </button>
           </div>
         </header>
 
-        {/* Preview Area with Split Canvas */}
-        <div ref={containerRef} className="relative flex-1 bg-gray-900 overflow-hidden">
-          <div className="absolute top-0 left-0 h-full bg-black" style={{ width: `${dividerPosition}%` }}>
-            <canvas id="original-canvas" className="w-full h-full object-contain"></canvas>
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500">Original</div>
-          </div>
-          <div className="absolute top-0 right-0 h-full bg-black" style={{ width: `${100 - dividerPosition}%` }}>
-            <canvas id="pixelated-canvas" className="w-full h-full object-contain"></canvas>
-            <div className="absolute inset-0 flex items-center justify-center text-gray-500">8-bit</div>
+        {/* Content Area */}
+        <div className="flex-1 flex flex-col overflow-hidden relative z-0">
+          {/* Canvas Section */}
+          <div className="flex-1 flex items-center justify-center p-6">
+            <VideoCanvas />
           </div>
 
-          {/* Divider */}
-          <div
-            className="absolute top-0 bottom-0 w-2 bg-blue-500 cursor-ew-resize opacity-50 hover:opacity-100 transition-opacity"
-            style={{ left: `calc(${dividerPosition}% - 4px)` }} // Adjust for divider width
-            onMouseDown={handleMouseDown}
-          ></div>
+          {/* Timeline Section */}
+          <div className="h-48 border-t border-white/5 bg-zinc-900/80 backdrop-blur-xl">
+            <Timeline />
+          </div>
         </div>
-
-        {/* Bottom Panel (Timeline) */}
-        <footer className="h-32 bg-gray-800 p-4 shadow-inner flex flex-col">
-          <h2 className="text-lg font-bold mb-2">Timeline</h2>
-          <div className="relative flex-grow bg-gray-700 rounded-md">
-            {/* Timeline Track */}
-            <div className="absolute inset-0 bg-gray-600 rounded-md"></div>
-            {/* Playhead */}
-            <div className="absolute top-0 bottom-0 w-1 bg-red-500" style={{ left: '10%' }}></div>
-            {/* Trim Handles */}
-            <div className="absolute top-0 bottom-0 w-3 bg-green-500 cursor-col-resize rounded-l" style={{ left: '5%' }}></div>
-            <div className="absolute top-0 bottom-0 w-3 bg-green-500 cursor-col-resize rounded-r" style={{ right: '5%' }}></div>
-          </div>
-        </footer>
       </main>
     </div>
   )

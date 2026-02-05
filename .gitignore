@@ -1,0 +1,17 @@
+/target
+/node_modules
+/npm-debug.*
+.idea/
+.DS_Store
+*.log
+*.bak
+*.swp
+/src/node_modules
+/src/dist
+/src/build
+/src/.vite
+
+# Tauri-specific ignores
+/src-tauri/target
+/src-tauri/src/target
+/src-tauri/dist

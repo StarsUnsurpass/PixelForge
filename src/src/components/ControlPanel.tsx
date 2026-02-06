@@ -1,6 +1,6 @@
 import React from 'react';
 import { useProjectStore } from '../store/useProjectStore';
-import { Sliders, Monitor, Palette, Grid, Upload } from 'lucide-react';
+import { Sliders, Monitor, Palette, Grid, Upload, FastForward } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 
 const ControlPanel = () => {
@@ -32,7 +32,7 @@ const ControlPanel = () => {
     };
 
     return (
-        <aside className="w-96 bg-zinc-900/80 border-r border-white/5 flex flex-col backdrop-blur-xl z-20 shadow-xl shadow-black/20">
+        <aside className="w-80 h-full bg-zinc-900/80 rounded-3xl border border-white/5 flex flex-col backdrop-blur-xl z-20 shadow-2xl shadow-black/20 overflow-hidden text-zinc-300">
             <div className="p-6 border-b border-white/5">
                 <h2 className="text-xs font-bold text-zinc-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <Sliders className="w-3 h-3" />
@@ -58,7 +58,7 @@ const ControlPanel = () => {
                         <h3 className="text-sm font-bold uppercase tracking-wider">像素化 (Pixelation)</h3>
                     </div>
 
-                    <div className="space-y-5 bg-zinc-800/30 p-5 rounded-xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
+                    <div className="space-y-5 bg-zinc-800/30 p-5 rounded-3xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
                         <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         <div className="space-y-3 relative">
                             <div className="flex justify-between text-xs items-center">
@@ -86,7 +86,7 @@ const ControlPanel = () => {
                         <h3 className="text-sm font-bold uppercase tracking-wider">色彩与抖动 (Color)</h3>
                     </div>
 
-                    <div className="space-y-5 bg-zinc-800/30 p-5 rounded-xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
+                    <div className="space-y-5 bg-zinc-800/30 p-5 rounded-3xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
                         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                         <div className="relative space-y-4">
@@ -144,7 +144,7 @@ const ControlPanel = () => {
                         <h3 className="text-sm font-bold uppercase tracking-wider">CRT 特效 (Effects)</h3>
                     </div>
 
-                    <div className="space-y-5 bg-zinc-800/30 p-5 rounded-xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
+                    <div className="space-y-5 bg-zinc-800/30 p-5 rounded-3xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
                         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
                         <div className="relative space-y-3">
@@ -165,6 +165,58 @@ const ControlPanel = () => {
                     </div>
                 </section>
 
+                {/* Video Settings Section */}
+                <section>
+                    <div className="flex items-center gap-2 mb-4 text-orange-400">
+                        <FastForward className="w-4 h-4" />
+                        <h3 className="text-sm font-bold uppercase tracking-wider">视频增强 (Video)</h3>
+                    </div>
+
+                    <div className="space-y-5 bg-zinc-800/30 p-5 rounded-xl border border-white/5 relative overflow-hidden group hover:border-white/10 transition-colors">
+                        <div className="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                        <div className="relative space-y-4">
+                            {/* Speed Control */}
+                            <div className="space-y-3">
+                                <div className="flex justify-between text-xs items-center">
+                                    <span className="text-zinc-400 font-medium">播放速度 (Speed)</span>
+                                    <span className="bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded text-[10px] font-mono border border-orange-500/20">{processingParams.videoSpeed.toFixed(1)}x</span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min="0.1"
+                                    max="4.0"
+                                    step="0.1"
+                                    value={processingParams.videoSpeed}
+                                    onChange={(e) => updateProcessingParams({ videoSpeed: parseFloat(e.target.value) })}
+                                    className="w-full h-1.5 bg-zinc-700 rounded-full appearance-none cursor-pointer accent-orange-500 hover:accent-orange-400"
+                                />
+                                <p className="text-[10px] text-zinc-500 flex justify-between">
+                                    <span>0.1x (慢放)</span>
+                                    <span>4.0x (快进)</span>
+                                </p>
+                            </div>
+
+                            {/* Interpolation Control */}
+                            <div className="space-y-2">
+                                <label className="text-xs text-zinc-400 block font-medium">帧插值 (Interpolation)</label>
+                                <select
+                                    value={processingParams.interpolationFps}
+                                    onChange={(e) => updateProcessingParams({ interpolationFps: parseInt(e.target.value) })}
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-300 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500/50 transition-all appearance-none"
+                                >
+                                    <option value="0">原生帧率 (Native)</option>
+                                    <option value="30">30 FPS (平滑)</option>
+                                    <option value="60">60 FPS (极度流畅)</option>
+                                </select>
+                                <p className="text-[10px] text-orange-400/80 mt-1">
+                                    注意: 插值处理可能非常耗时!
+                                </p>
+                            </div>
+                        </div>
+
+                    </div>
+                </section>
             </div>
 
             <div className="p-4 border-t border-white/5 bg-zinc-950/30 text-[10px] text-zinc-600 text-center flex justify-between px-6">

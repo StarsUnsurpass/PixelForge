@@ -10,6 +10,8 @@ PixelForge 是一款高性能桌面应用程序，旨在将视频转换为 8-bit
     *   分辨率缩放 (Resolution Scaling)
     *   色彩深度量化 (Color Depth Quantization)
     *   抖动算法 (Dithering Algorithms)
+    *   **视频调速 (Video Speed)**: 0.1x - 4.0x 无级变速。
+    *   **智能插帧 (Smart Interpolation)**: 低帧率转 60fps 流畅动画。
 *   **自定义调色板**:
     *   内置经典游戏机配色（如 GameBoy, NES）。
     *   从源视频自动提取调色板。

@@ -17,6 +17,8 @@ export interface ProcessingParams {
     scanlineIntensity: number; // 0.0 to 1.0
     curvatureStrength: number; // 0.0 to 1.0
     vignetteStrength: number; // 0.0 to 1.0
+    videoSpeed: number; // 0.1 to 4.0 (1.0 = normal)
+    interpolationFps: number; // 0 = native, 30, 60
 }
 
 interface ProjectState {
@@ -46,6 +48,8 @@ export const useProjectStore = create<ProjectState>((set) => ({
         scanlineIntensity: 0.0,
         curvatureStrength: 0.0,
         vignetteStrength: 0.0,
+        videoSpeed: 1.0,
+        interpolationFps: 0,
     },
     isPlaying: false,
     currentTime: 0,
